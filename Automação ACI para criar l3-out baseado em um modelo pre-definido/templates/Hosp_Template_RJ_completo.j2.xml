@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<imdata totalCount="1">
+   <l3extOut annotation="" descr="" dn="uni/tn-tn-GNDI-RJO/out-L3Out_AS{{ASNREMOTO}}_{{NOME_DA_LOCALIDADE}}" enforceRtctrl="export,import" name="L3Out_AS{{ASNREMOTO}}_{{NOME_DA_LOCALIDADE}}" nameAlias="" ownerKey="" ownerTag="" targetDscp="unspecified">
+      <rtctrlProfile annotation="" descr="" name="RMap_AS{{ASNREMOTO}}_OUT" nameAlias="" ownerKey="" ownerTag="" type="combinable">
+         <rtctrlCtxP action="permit" annotation="" descr="" name="RMap_AS{{ASNREMOTO}}_OUT_0" nameAlias="" order="0">
+            <rtctrlScope annotation="" descr="" name="" nameAlias="">
+               <rtctrlRsScopeToAttrP annotation="" tnRtctrlAttrPName="RMap_AS{{ASNREMOTO}}_OUT_0_set" />
+            </rtctrlScope>
+            <rtctrlRsCtxPToSubjP annotation="" tnRtctrlSubjPName="RMap_AS{{ASNREMOTO}}_OUT_0_match" />
+         </rtctrlCtxP>
+      </rtctrlProfile>
+      <rtctrlProfile annotation="" descr="Route Map {{NOME_DA_LOCALIDADE}}" name="RMap_AS{{ASNREMOTO}}_IN" nameAlias="" ownerKey="" ownerTag="" type="combinable">
+         <rtctrlCtxP action="permit" annotation="" descr="" name="RMap_AS{{ASNREMOTO}}_IN_0" nameAlias="" order="0">
+            <rtctrlScope annotation="" descr="" name="" nameAlias="">
+               <rtctrlRsScopeToAttrP annotation="" tnRtctrlAttrPName="RMap_AS{{ASNREMOTO}}_IN_0_set" />
+            </rtctrlScope>
+            <rtctrlRsCtxPToSubjP annotation="" tnRtctrlSubjPName="RMap_AS{{ASNREMOTO}}_IN_0_match" />
+         </rtctrlCtxP>
+      </rtctrlProfile>
+      <l3extRsL3DomAtt annotation="" tDn="uni/l3dom-L3Dom-TRANSITO-L3-RJO" />
+      <l3extRsEctx annotation="" tnFvCtxName="VRF-GNDI-FE-RJO" />
+      <l3extLNodeP annotation="" configIssues="" descr="" name="ND_Profl_{{LEAFID}}_AS{{ASNREMOTO}}" nameAlias="" ownerKey="" ownerTag="" tag="yellow-green" targetDscp="unspecified">
+         <l3extRsNodeL3OutAtt annotation="" configIssues="" rtrId="{{ROUTERID}}" rtrIdLoopBack="no" tDn="topology/pod-1/node-{{LEAFID}}"/>
+         <l3extLIfP annotation="" descr="" name="IntProf_AS{{ASNREMOTO}}" nameAlias="" ownerKey="" ownerTag="" prio="unspecified" tag="yellow-green">
+            <l3extRsPathL3OutAtt addr="{{IPLOCALEMASCARA}}" annotation="" autostate="disabled" descr="" encap="unknown" encapScope="local" ifInstT="l3-port" ipv6Dad="enabled" llAddr="::" mac="00:22:BD:F8:19:FA" mode="regular" mtu="1500" tDn="topology/pod-1/paths-{{LEAFID}}/pathep-[eth{{LEAFINTERFACE}}]" targetDscp="unspecified">
+               <bgpPeerP addr="{{BGPEERIP}}" addrTCtrl="af-ucast" allowedSelfAsCnt="3" annotation="" ctrl="nh-self" descr="" name="" nameAlias="" peerCtrl="bfd" privateASctrl="" ttl="1" weight="0">
+                  <bgpRsPeerPfxPol annotation="" tnBgpPeerPfxPolName="" />
+                  <bgpAsP annotation="" asn="{{ASNREMOTO}}" descr="" name="" nameAlias="" />
+               </bgpPeerP>
+            </l3extRsPathL3OutAtt>
+            <l3extRsNdIfPol annotation="" tnNdIfPolName="" />
+            <l3extRsLIfPCustQosPol annotation="" tnQosCustomPolName="" />
+            <l3extRsIngressQosDppPol annotation="" tnQosDppPolName="" />
+            <l3extRsEgressQosDppPol annotation="" tnQosDppPolName="" />
+            <l3extRsArpIfPol annotation="" tnArpIfPolName="" />
+            <bfdIfP annotation="" descr="" keyId="1" name="" nameAlias="" type="none">
+               <bfdRsIfPol annotation="" tnBfdIfPolName="BFD_Prof_L2L_300" />
+            </bfdIfP>
+         </l3extLIfP>
+      </l3extLNodeP>
+      <l3extInstP annotation="" descr="" exceptionTag="" floodOnEncap="disabled" matchT="AtleastOne" name="EPG-L3Out_AS{{ASNREMOTO}}_{{NOME_DA_LOCALIDADE}}" nameAlias="" prefGrMemb="include" prio="unspecified" targetDscp="unspecified">
+         <l3extRsInstPToProfile annotation="" direction="export" tnRtctrlProfileName="RMap_AS{{ASNREMOTO}}_OUT" />
+         <l3extRsInstPToProfile annotation="" direction="import" tnRtctrlProfileName="RMap_AS{{ASNREMOTO}}_IN" />
+         <l3extSubnet aggregate="" annotation="" descr="" ip="128.0.0.0/1" name="" nameAlias="" scope="import-security" />/>
+         <l3extSubnet aggregate="" annotation="" descr="" ip="0.0.0.0/1" name="" nameAlias="" scope="import-security" />
+         <fvRsCustQosPol annotation="" tnQosCustomPolName="" />
+      </l3extInstP>
+      <bgpExtP annotation="" descr="" nameAlias="" />
+   </l3extOut>
+</imdata>

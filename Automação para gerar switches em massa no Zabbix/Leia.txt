@@ -1,0 +1,13 @@
+O programa só lê o arquivo com nome "switchs_import.csv".
+
+Utilize como referencia o .csv disponivel no diretorio MODELO CSV.
+
+A ordem das colunas NÃO importa, o nome das colunas SIM (primeira linha) e o "switchs_import.csv" deve conter OBRIGATORIAMENTE as seguintes colunas para funcionar:
+
+SITE;STACK;IP;IPNAT;VISIBLENAME;FQDN 
+
+Separação com ponto e vírgula
+
+É necessário que a coluna STACK esteja preenchida com SIM ou NAO, caso contrario não serão geradas as entradas para cadastramento do host (exemplo, se estiver em branco essa coluna, ou com outra string).
+
+Não edite os arquivos da pasta template.

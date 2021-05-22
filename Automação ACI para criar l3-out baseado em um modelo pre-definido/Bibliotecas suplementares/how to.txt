@@ -1,0 +1,14 @@
+via power shell acessar o diretorio aonde encontra-se o arquivo setup.py do pacote (markupsafe-master primeiro e depois jinja-master).
+
+já dentro do diretorio, executar py .\setup.py install.
+
+Confirmar com pip:
+
+PS C:\Users\danilo.ulbrecht\OneDrive - Tivit\Área de Trabalho\Nova automação - Gerador de scripts> pip list
+Package    Version
+---------- --------
+jinja2     3.0.0a1
+markupsafe 2.0.0rc1
+pip        20.2.3
+setuptools 49.2.1
+

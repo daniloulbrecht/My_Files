@@ -1,0 +1,682 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.1.3"/>
+    <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.5.20">
+      <gitLabConnection></gitLabConnection>
+      <jobCredentialId></jobCredentialId>
+      <useAlternativeCredential>false</useAlternativeCredential>
+    </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>HOSTNAME</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>CLIENTE-BRT-FWDC01</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>FIREWALL_IP</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>172.21.226.1</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>VDOM</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>root</string>
+              <string>VDOM-PARC</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.plugins.validating__string__parameter.ValidatingStringParameterDefinition plugin="validating-string-parameter@2.8">
+          <name>NAME</name>
+          <description>Nome da regra.
+Obs: Em caso de nomes repetidos, a nova regra será criada sem nome. </description>
+          <defaultValue>Rule Name</defaultValue>
+          <regex>^[\w\d\sçÇáéíóúÁÉÍÓÚâêîôûÂÊÎÔÛãÃõÕ]{1,35}$</regex>
+          <failedValidationMessage>Insira o nome da regra com até 35 caracteres</failedValidationMessage>
+        </hudson.plugins.validating__string__parameter.ValidatingStringParameterDefinition>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.6">
+          <name>SRC_INTF</name>
+          <description></description>
+          <randomName>choice-parameter-3979972447328936</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.76">
+              <script>def myFile = new File(&quot;/var/jenkins_home/workspace/FGT_Rule_Creator/${HOSTNAME}_${VDOM}_getint.txt&quot;)
+
+def lines = myFile.readLines()
+lines.each {line -&gt;
+println line
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.76">
+              <script>return [&apos;Falha ao carregar os objetos de source interface&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>FGT_Rule_Creator</projectName>
+          <projectFullName>FGT_Rule_Creator</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>HOSTNAME,VDOM</referencedParameters>
+          <choiceType>PT_CHECKBOX</choiceType>
+          <filterable>true</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.6">
+          <name>DST_INTF</name>
+          <description></description>
+          <randomName>choice-parameter-3987037208579171</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.76">
+              <script>def myFile = new File(&quot;/var/jenkins_home/workspace/FGT_Rule_Creator/${HOSTNAME}_${VDOM}_getint.txt&quot;)
+
+def lines = myFile.readLines()
+lines.each {line -&gt;
+println line
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.76">
+              <script>return [&apos;Falha ao carregar os objetos de destination interface&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>FGT_Rule_Creator</projectName>
+          <projectFullName>FGT_Rule_Creator</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>HOSTNAME,VDOM</referencedParameters>
+          <choiceType>PT_CHECKBOX</choiceType>
+          <filterable>true</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>SRC_INTERNETSERVICES</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>NAO</string>
+              <string>SIM</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.6">
+          <name>SRC_ADDR</name>
+          <description></description>
+          <randomName>choice-parameter-3987037212461930</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.76">
+              <script>if (SRC_INTERNETSERVICES.equals (&quot;SIM&quot;)) {
+  def myFile = new File(&quot;/var/jenkins_home/workspace/FGT_Rule_Creator/${HOSTNAME}_${VDOM}_isdbsrc.txt&quot;)
+
+def lines = myFile.readLines()
+lines.each {line -&gt;
+println line
+}
+}
+else if (SRC_INTERNETSERVICES.equals (&quot;NAO&quot;)) {
+  def myFile = new File(&quot;/var/jenkins_home/workspace/FGT_Rule_Creator/${HOSTNAME}_${VDOM}_getsrcaddress.txt&quot;)
+
+def lines = myFile.readLines()
+lines.each {line -&gt;
+println line
+}
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.76">
+              <script>return [&apos;Falha ao carregar os objetos de SOURCE ADDRESS&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>FGT_Rule_Creator</projectName>
+          <projectFullName>FGT_Rule_Creator</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>HOSTNAME,VDOM,DST_INTERNETSERVICES,SRC_INTERNETSERVICES</referencedParameters>
+          <choiceType>PT_CHECKBOX</choiceType>
+          <filterable>true</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.6">
+          <name>DST_INTERNETSERVICES</name>
+          <description></description>
+          <randomName>choice-parameter-3987037222740437</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.76">
+              <script>if (SRC_INTERNETSERVICES.equals (&quot;SIM&quot;)) {
+  return [&quot;NAO&quot;]
+}
+else if (SRC_INTERNETSERVICES.equals (&quot;NAO&quot;)) {
+  return [&quot;NAO&quot;,&quot;SIM&quot;]
+}
+</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.76">
+              <script>return [&apos;Falha ao carregar as opções de DST_INTERNETSERVICES&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>FGT_Rule_Creator</projectName>
+          <projectFullName>FGT_Rule_Creator</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>SRC_INTERNETSERVICES</referencedParameters>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.6">
+          <name>DST_ADDR</name>
+          <description></description>
+          <randomName>choice-parameter-3987037227395374</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.76">
+              <script>if (DST_INTERNETSERVICES.equals (&quot;SIM&quot;)) {
+  def myFile = new File(&quot;/var/jenkins_home/workspace/FGT_Rule_Creator/${HOSTNAME}_${VDOM}_isdbdst.txt&quot;)
+
+def lines = myFile.readLines()
+lines.each {line -&gt;
+println line
+}
+}
+else if (DST_INTERNETSERVICES.equals (&quot;NAO&quot;)) {
+  def myFile = new File(&quot;/var/jenkins_home/workspace/FGT_Rule_Creator/${HOSTNAME}_${VDOM}_getdstaddress.txt&quot;)
+
+def lines = myFile.readLines()
+lines.each {line -&gt;
+println line
+}
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.76">
+              <script>return [&apos;Falha ao carregar os objetos de DESTINATION ADDRESS&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>FGT_Rule_Creator</projectName>
+          <projectFullName>FGT_Rule_Creator</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>HOSTNAME,VDOM,DST_INTERNETSERVICES,SRC_INTERNETSERVICES</referencedParameters>
+          <choiceType>PT_CHECKBOX</choiceType>
+          <filterable>true</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.6">
+          <name>SERVICE</name>
+          <description></description>
+          <randomName>choice-parameter-4410458233023843</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.76">
+              <script>if (DST_INTERNETSERVICES.equals (&quot;SIM&quot;)) {
+	return [&quot;Nenhum&quot;]
+}
+else if (DST_INTERNETSERVICES.equals (&quot;NAO&quot;)) {
+  def myFile = new File(&quot;/var/jenkins_home/workspace/FGT_Rule_Creator/${HOSTNAME}_${VDOM}_getservices.txt&quot;)
+
+def lines = myFile.readLines()
+lines.each {line -&gt;
+println line
+}
+}
+</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.76">
+              <script>return [&apos;Falha ao carregar as opções de SERVICES&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>FGT_Rule_Creator</projectName>
+          <projectFullName>FGT_Rule_Creator</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>DST_INTERNETSERVICES, VDOM, HOSTNAME</referencedParameters>
+          <choiceType>PT_CHECKBOX</choiceType>
+          <filterable>true</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>ACTION</name>
+          <description>Permitir ou bloquear o trafego</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>accept</string>
+              <string>deny</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>INSPECTION_MODE</name>
+          <description>Modo de inspeção da regra</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>flow</string>
+              <string>proxy</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>SNAT</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>disable</string>
+              <string>enable</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.6">
+          <name>SNAT_POOL</name>
+          <description>&quot;disable&quot; para source NAT overload com o IP da interface de saida.</description>
+          <randomName>choice-parameter-4410458237999114</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.76">
+              <script>if (SNAT.equals (&quot;disable&quot;)) {
+  return [&quot;disable&quot;]
+}
+else if (SNAT.equals (&quot;enable&quot;)) {
+  return [&quot;disable&quot;,&quot;enable&quot;]
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.76">
+              <script>return [&apos;Falha ao carregar as opções de SNAT_POOL&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>FGT_Rule_Creator</projectName>
+          <projectFullName>FGT_Rule_Creator</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>SNAT</referencedParameters>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.6">
+          <name>SNAT_POOL_NAME</name>
+          <description></description>
+          <randomName>choice-parameter-4410458242735097</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.76">
+              <script>if (SNAT.equals (&quot;enable&quot;) &amp;&amp; SNAT_POOL.equals (&quot;enable&quot;)) {
+  def myFile = new File(&quot;/var/jenkins_home/workspace/FGT_Rule_Creator/${HOSTNAME}_${VDOM}_getsnats.txt&quot;)
+
+def lines = myFile.readLines()
+lines.each {line -&gt;
+println line
+}
+} 
+else {
+ return [&quot;Nenhum&quot;]
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.76">
+              <script>return [&apos;Falha ao carregar as opções de SNAT_POOL&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>FGT_Rule_Creator</projectName>
+          <projectFullName>FGT_Rule_Creator</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>SNAT,HOSTNAME,VDOM,SNAT_POOL</referencedParameters>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.6">
+          <name>PROTOCOL_OPTIONS</name>
+          <description></description>
+          <randomName>choice-parameter-4417023862976548</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.76">
+              <script>  def myFile = new File(&quot;/var/jenkins_home/workspace/FGT_Rule_Creator/${HOSTNAME}_${VDOM}_getprofopt.txt&quot;)
+
+def lines = myFile.readLines()
+lines.each {line -&gt;
+println line
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.76">
+              <script>return [&apos;Falha ao carregar os PROTOCOL OPTIONS&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>FGT_Rule_Creator</projectName>
+          <projectFullName>FGT_Rule_Creator</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>HOSTNAME,VDOM</referencedParameters>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>true</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>SECURITY_PROFILES</name>
+          <description></description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>Nenhum</string>
+              <string>enable</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.6">
+          <name>AV_PROFILE</name>
+          <description>Profile Webfilter</description>
+          <randomName>choice-parameter-4417023866115343</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.76">
+              <script>if (SECURITY_PROFILES.equals (&quot;Nenhum&quot;)) {
+  return [&quot;Nenhum&quot;]
+}
+else if (SECURITY_PROFILES.equals (&quot;enable&quot;)) {
+def myFile = new File(&quot;/var/jenkins_home/workspace/FGT_Rule_Creator/${HOSTNAME}_${VDOM}_getavprof.txt&quot;) 
+
+def lines = myFile.readLines()
+lines.each {line -&gt;
+println line
+}
+}
+</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.76">
+              <script>return [&apos;Falha ao carregar os PROFILE ANTIVIRUS&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>FGT_Rule_Creator</projectName>
+          <projectFullName>FGT_Rule_Creator</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>HOSTNAME,VDOM,SECURITY_PROFILES</referencedParameters>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>true</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.6">
+          <name>WEB_FILTER</name>
+          <description>Profile Webfilter</description>
+          <randomName>choice-parameter-4417023869369928</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.76">
+              <script>if (SECURITY_PROFILES.equals (&quot;Nenhum&quot;)) {
+  return [&quot;Nenhum&quot;]
+}
+else if (SECURITY_PROFILES.equals (&quot;enable&quot;)) {
+  def myFile = new File(&quot;/var/jenkins_home/workspace/FGT_Rule_Creator/${HOSTNAME}_${VDOM}_getwebfiltprof.txt&quot;)
+
+def lines = myFile.readLines()
+lines.each {line -&gt;
+println line
+}
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.76">
+              <script>return [&apos;Falha ao carregar os PROFILE DE WEB FILTER&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>FGT_Rule_Creator</projectName>
+          <projectFullName>FGT_Rule_Creator</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>HOSTNAME,VDOM,SECURITY_PROFILES</referencedParameters>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>true</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.6">
+          <name>DNS_FILTER</name>
+          <description>Profile DNS</description>
+          <randomName>choice-parameter-4417023872633995</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.76">
+              <script>if (SECURITY_PROFILES.equals (&quot;Nenhum&quot;)) {
+  return [&quot;Nenhum&quot;]
+}
+else if (SECURITY_PROFILES.equals (&quot;enable&quot;)) {
+  def myFile = new File(&quot;/var/jenkins_home/workspace/FGT_Rule_Creator/${HOSTNAME}_${VDOM}_getdnsfiltprof.txt&quot;)
+
+def lines = myFile.readLines()
+lines.each {line -&gt;
+println line
+}
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.76">
+              <script>return [&apos;Falha ao carregar o DNS PROFILE&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>FGT_Rule_Creator</projectName>
+          <projectFullName>FGT_Rule_Creator</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>HOSTNAME,VDOM,SECURITY_PROFILES</referencedParameters>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>true</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.6">
+          <name>APP_CONTROL</name>
+          <description>Profile AplicationControl</description>
+          <randomName>choice-parameter-4417023875824064</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.76">
+              <script>if (SECURITY_PROFILES.equals (&quot;Nenhum&quot;)) {
+  return [&quot;Nenhum&quot;]
+}
+else if (SECURITY_PROFILES.equals (&quot;enable&quot;)) {
+  def myFile = new File(&quot;/var/jenkins_home/workspace/FGT_Rule_Creator/${HOSTNAME}_${VDOM}_getappprof.txt&quot;)
+
+def lines = myFile.readLines()
+lines.each {line -&gt;
+println line
+}
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.76">
+              <script>return [&apos;Falha ao carregar o APP PROFILE&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>FGT_Rule_Creator</projectName>
+          <projectFullName>FGT_Rule_Creator</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>HOSTNAME,VDOM,SECURITY_PROFILES</referencedParameters>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>true</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.6">
+          <name>IPS_PROFILE</name>
+          <description>Profile IPS</description>
+          <randomName>choice-parameter-4417023879041869</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.76">
+              <script>if (SECURITY_PROFILES.equals (&quot;Nenhum&quot;)) {
+  return [&quot;Nenhum&quot;]
+}
+else if (SECURITY_PROFILES.equals (&quot;enable&quot;)) {
+  def myFile = new File(&quot;/var/jenkins_home/workspace/FGT_Rule_Creator/${HOSTNAME}_${VDOM}_getipsprof.txt&quot;)
+
+def lines = myFile.readLines()
+lines.each {line -&gt;
+println line
+}
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.76">
+              <script>return [&apos;Falha ao carregar o IPS PROFILE&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>FGT_Rule_Creator</projectName>
+          <projectFullName>FGT_Rule_Creator</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>HOSTNAME,VDOM,SECURITY_PROFILES</referencedParameters>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>true</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.6">
+          <name>WAF_PROFILE</name>
+          <description>Profile WAF</description>
+          <randomName>choice-parameter-4417023882698589</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.76">
+              <script>if (SECURITY_PROFILES.equals (&quot;Nenhum&quot;) || (INSPECTION_MODE.equals (&quot;flow&quot;))) {
+  return [&quot;Nenhum&quot;]
+}
+else if (SECURITY_PROFILES.equals (&quot;enable&quot;) &amp;&amp; (INSPECTION_MODE.equals (&quot;proxy&quot;))) {
+  def myFile = new File(&quot;/var/jenkins_home/workspace/FGT_Rule_Creator/${HOSTNAME}_${VDOM}_getwafprof.txt&quot;)
+
+def lines = myFile.readLines()
+lines.each {line -&gt;
+println line
+}
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.76">
+              <script>return [&apos;Falha ao carregar o WAF PROFILE&apos;]
+</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>FGT_Rule_Creator</projectName>
+          <projectFullName>FGT_Rule_Creator</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>HOSTNAME,VDOM,SECURITY_PROFILES,INSPECTION_MODE</referencedParameters>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>true</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.6">
+          <name>SSL_INSP_PROF</name>
+          <description>Profile Inspeção SSL</description>
+          <randomName>choice-parameter-4417023886372857</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.76">
+              <script>  def myFile = new File(&quot;/var/jenkins_home/workspace/FGT_Rule_Creator/${HOSTNAME}_${VDOM}_getsslprof.txt&quot;)
+
+def lines = myFile.readLines()
+lines.each {line -&gt;
+println line
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.76">
+              <script>return [&apos;Falha ao carregar o SSL INSPECTION PROFILE&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>FGT_Rule_Creator</projectName>
+          <projectFullName>FGT_Rule_Creator</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>HOSTNAME,VDOM</referencedParameters>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>true</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>LOG</name>
+          <description>Tipo de logging</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>utm</string>
+              <string>all</string>
+              <string>disable</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.6">
+          <name>MOVE_BEFORE</name>
+          <description>Utilize caso deseje mover a regra nova acima de uma já existente</description>
+          <randomName>choice-parameter-4417023890142999</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.76">
+              <script>  def myFile = new File(&quot;/var/jenkins_home/workspace/FGT_Rule_Creator/${HOSTNAME}_${VDOM}_getfwrulenumbers.txt&quot;)
+
+def lines = myFile.readLines()
+lines.each {line -&gt;
+println line
+}</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.76">
+              <script>return [&apos;Falha ao carregar OS ids das regras existentes&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>FGT_Rule_Creator</projectName>
+          <projectFullName>FGT_Rule_Creator</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>HOSTNAME,VDOM</referencedParameters>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>true</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <org.jvnet.hudson.plugins.SSHBuilder plugin="ssh@2.6.1">
+      <siteName>root@tvtinfraCLIENTEi01:22</siteName>
+      <command>python3 /srv/jenkins/workspace/FGT_Rule_Creator/fortigate_automation_v2.py ${FIREWALL_IP} ${VDOM} &quot;\&quot;${NAME}&quot;\&quot; &quot;${SRC_INTF}&quot; &quot;${DST_INTF}&quot; &quot;${SRC_ADDR}&quot; &quot;${DST_ADDR}&quot; &quot;${SERVICE}&quot; ${ACTION} ${INSPECTION_MODE} ${SNAT} ${SNAT_POOL} ${SNAT_POOL_NAME} ${PROTOCOL_OPTIONS} ${AV_PROFILE} ${WEB_FILTER} ${DNS_FILTER} ${APP_CONTROL} ${IPS_PROFILE} ${WAF_PROFILE} ${SSL_INSP_PROF} ${LOG} ${USERNAME} ${PASSWORD} ${MOVE_BEFORE} ${SRC_INTERNETSERVICES} ${DST_INTERNETSERVICES} ${SECURITY_PROFILES}</command>
+      <execEachLine>false</execEachLine>
+      <hideCommand>false</hideCommand>
+    </org.jvnet.hudson.plugins.SSHBuilder>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@1.24">
+      <bindings>
+        <org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+          <credentialsId>tvt.svc.jenkins.global</credentialsId>
+          <usernameVariable>USERNAME</usernameVariable>
+          <passwordVariable>PASSWORD</passwordVariable>
+        </org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+      </bindings>
+    </org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper>
+  </buildWrappers>
+</project>

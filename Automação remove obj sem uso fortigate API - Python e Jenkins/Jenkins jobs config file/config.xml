@@ -1,0 +1,118 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Esse projeto foi construido para efetuar a exibição e remoção de objetos sem uso em Firewall Fortigate via API.&#xd;
+&#xd;
+Todo Firewall possui um limite com relação ao número de objetos de um determinado tipo, esse limite pode ser consultado na documentação oficial da Fortinet:&#xd;
+https://docs.fortinet.com/max-value-table&#xd;
+&#xd;
+Por isso é recomendável manter sempre a configuração enxuta, principalmente em caixas mais &quot;fracas&quot;. Mesmo em caixas &quot;mais poderosas&quot;, não manter &quot;lixo&quot; é sempre uma boa prática administrativa,&#xd;
+&#xd;
+A coleta é feita via script externo em python, utilizando as bibliotecas requests e json e as funções system.argv e import urllib.parse.&#xd;
+Os campos observados na resposta são:&#xd;
+&#xd;
+&quot;q_ref&quot; - Quantas vezes o objeto é referenciado (ou seja aonde ele esta em uso), &apos;0&apos; significa que não esta em uso, é o que o script procura.&#xd;
+&quot;name&quot; - Nome do objeto. Se presente na lista de exceção o objeto não entra na lista de remoção, mesmo que esteja sem uso (ref 0).&#xd;
+&quot;q_static&quot; - Objeto fixo do Firewall. Se &apos;true&apos; ignora, mesmo que esteja sem uso (ref 0).&#xd;
+&quot;q_no_edit&quot; - Objeto que não pode ser editado. Se &apos;true&apos; ignora, mesmo que esteja sem uso (ref 0).&#xd;
+&#xd;
+Os tipos de objetos que podem ser removidos são:&#xd;
+&#xd;
+vipgrp&#xd;
+vip&#xd;
+addrgrp&#xd;
+address&#xd;
+service group&#xd;
+service custom&#xd;
+&#xd;
+Obs: O projeto pode ser facilmente expandido para outros tipos de objetos, incluindo &apos;IF&quot;s adicionais no script em python e novas opções no &quot;choice parameter&quot;.</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.1.3"/>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>fortigate_ip</name>
+          <description>IP mgmt do fortigate alvo, necessário liberação https na porta.</description>
+          <defaultValue></defaultValue>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>vdom_name</name>
+          <description>Nome exato sem espaços do vdom alvo</description>
+          <defaultValue>root</defaultValue>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>tipo_de_objeto</name>
+          <description>Escolha um tipo de objeto para exibição|remoção.
+
+DICA: Execute PRIMEIRO a descoberta e remoção de grupos de objetos sem uso, desta forma os objetos que estavam dentro desses grupos, e que também não estiverem uso, aparecerão posteriormente na exibição|remoção dos objetos individuais, otimizando a limpeza.</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>vipgrp</string>
+              <string>vip</string>
+              <string>addrgrp</string>
+              <string>address</string>
+              <string>service_group</string>
+              <string>service</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>excecao</name>
+          <description>Coloque aqui os objetos que não quer que sejam removidos ou exibidos.
+
+DICA: Não coloque nada ao exibir, ao remover insira neste text box o que você não quer remover do que lhe foi exibido, se desejar remover tudo não coloque nada também.
+
+O NOME TEM QUE SER EXATO, pode-se colocar mais de um nome de objeto em sequencia, não é sequer necessário separação com espaço ou virgula, separe com espaço apenas por conveniencia de visualização no console output caso desejar.</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>acao</name>
+          <description>exibir: lista os objetos sem uso para você enviar ao cliente e pedir autorização para remover, ou mesmo para ter certeza do que será removido.
+remover: remove os objetos sem uso.</description>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>exibir</string>
+              <string>remover</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.5.20">
+      <gitLabConnection></gitLabConnection>
+      <jobCredentialId></jobCredentialId>
+      <useAlternativeCredential>false</useAlternativeCredential>
+    </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <org.jvnet.hudson.plugins.SSHBuilder plugin="ssh@2.6.1">
+      <siteName>root@tvtinfragndi01:22</siteName>
+      <command>python3 /opt/tivit/scripts/jenkins/network/FGT_RM_UNUSED_OBG.py ${username} ${password} ${fortigate_ip} ${vdom_name} ${tipo_de_objeto} ${acao} &quot;\&quot;${excecao}&quot;\&quot;</command>
+      <execEachLine>false</execEachLine>
+      <hideCommand>false</hideCommand>
+    </org.jvnet.hudson.plugins.SSHBuilder>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@1.24">
+      <bindings>
+        <org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+          <credentialsId>tvt.svc.jenkins.global</credentialsId>
+          <usernameVariable>username</usernameVariable>
+          <passwordVariable>password</passwordVariable>
+        </org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+      </bindings>
+    </org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper>
+  </buildWrappers>
+</project>
