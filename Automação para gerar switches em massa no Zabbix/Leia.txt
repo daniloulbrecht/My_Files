@@ -1,3 +1,5 @@
+Import_20.py gera arquivos .xml de 20 em 20 para não sobrecarregar o Zabbix na importação.
+
 O programa só lê o arquivo com nome "switchs_import.csv".
 
 Utilize como referencia o .csv disponivel no diretorio MODELO CSV.
