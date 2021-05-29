@@ -8,7 +8,7 @@ Abaixo um exemplo para forçar 5 tentativas seguidas de acesso SSH.
 from netmiko import Netmiko
 
 
-def try_netmiko_three_times(fdevice, ntimes):
+def try_netmiko_n_times(fdevice, ntimes = 3):
     contador = 1
     while contador < ntimes + 1:
         try:
@@ -23,14 +23,16 @@ def try_netmiko_three_times(fdevice, ntimes):
     return fsshconnection
 
 
-device = {
-    "host": "192.168.255.31",
-    "username": "admin",
-    "password": "123456",
-    "device_type": "cisco_ios",
-}
+# unit test
+if __name__ == "__main__":
+    device = {
+        "host": "192.168.255.31",
+        "username": "admin",
+        "password": "123456",
+        "device_type": "cisco_ios",
+    }
 
-sshconnection = try_netmiko_three_times(device, 5)
-output = sshconnection.send_command("sh version")
-print(output)
-sshconnection.disconnect()
+    sshconnection = try_netmiko_n_times(device, 5)
+    output = sshconnection.send_command("sh version")
+    print(output)
+    sshconnection.disconnect()
