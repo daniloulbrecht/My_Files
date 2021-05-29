@@ -1,6 +1,6 @@
 """
 28/05/2021
-Danilo Nogueira Ulbrecht
+***Danilo Nogueira Ulbrecht***
 Em alguns ambientes a autenticação via TACACS pode falhar e isso causa
 a quebra do nosso script.
 Abaixo um exemplo para forçar 5 tentativas seguidas de acesso SSH.
