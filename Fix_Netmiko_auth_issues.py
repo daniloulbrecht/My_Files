@@ -15,8 +15,7 @@ def try_netmiko_three_times(fdevice, ntimes):
             fsshconnection = Netmiko(**fdevice)
             contador = ntimes + 2
         except:
-            print(
-                f"Tentativa de conexão {contador} falhou, tentando"
+            print(f"Tentativa de conexão {contador} falhou, tentando"
                 + " conectar novamente ...")
             contador += 1
     if contador == ntimes + 1:
