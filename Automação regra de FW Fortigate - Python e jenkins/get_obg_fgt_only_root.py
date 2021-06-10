@@ -1,13 +1,15 @@
 # Autor: Danilo Nogueira Ulbrecht
+# Autor: Cae Masquetti Caetano
+# Autor: Murilo Costa
 # encoding: utf-8
-# Programa para gerar databases de objetos Fortigate para uso no Jenkins.
+# Programa para gerar propertyfile de objetos Fortigate para o Jenkins.
 # A coleta e feita via SSH para a maioria dos objetos.
-# A documentação oficial da API do Fortigate é paga, e nao tenho acesso a DOC mais recente, por isso as coletas sao efetuadas por SSH.
-# A unica coleta feita por API é de internet services por que traz mais metadados.
+# A documentação oficial da API do Fortigate é paga, e nao temos acesso a DOC mais recente, por isso as coletas sao via SSH.
+# A unica coleta feita via API é de internet services por que traz mais metadados.
 
 from re import findall
 from re import sub
-from netmiko import Netmiko
+from netmiko import ConnectHandler
 from sys import argv
 import requests
 import json
@@ -15,26 +17,24 @@ import warnings
 
 warnings.filterwarnings('ignore', message='Unverified HTTPS request')
 
-# A ordem que o Jenkins passa os argumentos IMPORTA, tem que ser a mesma abaixo.
+# Recebe valores de fora (shell)
 JHOSTNAME, JFIREWALL_IP, JVDOM, JUSERNAME, JPASSWORD = argv[1:]
+ABS_PATH = "/var/jenkins_home/workspace/FGT_Get_Objects/"
 
 def formata_saida(foutput, firststr="", interfaces=False, fwrule=False):
     """
     Essa Funcao limpa a saida dos comandos extraidas do Fortigate
-    e retorna uma string formatada para posteriormente escreveremos 
-    numa database txt. Essa database poderá ser utilizada
-    no Jenkins aonde vamos carregar essas databases em parameters
-    utilizando groovy script para leitura e apresentação desses dados.    
+    e retorna uma string formatada para uso no Jenkins
     """
     if interfaces == True:
-        limpa = findall('edit \".*?\"', foutput) # if de interfaces.
+        limpa = findall('edit \".*?\"', foutput) # interfaces
         limpamais = []
         for item in limpa: limpamais.append(sub('"', "'", item.strip("edit ")))
         limpa = limpamais
     elif fwrule == True:
-        limpa = findall("[0-9]+", foutput) # if para id das regras.
+        limpa = findall("[0-9]+", foutput) # id das regras em ordem
     else:
-        limpa = findall("\'.*?\'", sub('\"', "\'", foutput)) # restante das coletas.
+        limpa = findall("\'.*?\'", sub('\"', "\'", foutput)) # restante
     conteudo = firststr
     contador = 0
     for item in limpa:
@@ -47,7 +47,6 @@ def formata_saida(foutput, firststr="", interfaces=False, fwrule=False):
             conteudo = conteudo+item
     return conteudo
 
-
 # Dados para instaciar sessao ssh com o fw
 firewall = {'device_type': 'fortinet',
           'ip': JFIREWALL_IP,
@@ -55,11 +54,11 @@ firewall = {'device_type': 'fortinet',
           'password': JPASSWORD
           }
 
-firewall_session = Netmiko(**firewall) # objeto da sessao SSH estabelecida
-firewall_session.send_command('config vdom', expect_string='#') # comente essa linha se o seu FW nao for mvdom
-firewall_session.send_command('edit '+JVDOM, expect_string='#') # comente essa linha se o seu FW nao for mvdom
+firewall_session = ConnectHandler(**firewall) # objeto da sessao SSH estabelecida
+#firewall_session.send_command('config vdom', expect_string='#') # comente essa linha se o seu FW nao for mvdom
+#firewall_session.send_command('edit '+JVDOM, expect_string='#') # comente essa linha se o seu FW nao for mvdom
 
-# Dicionario com os comandos de coleta de objetos.
+# Dicionario com o restante dos comandos
 fw_commands_dict = {
 "getservices" : ["show firewall service custom | grep edit","show firewall service group | grep edit"],
 "getsnats" : "show firewall ippool | grep edit",
@@ -77,7 +76,7 @@ fw_commands_dict = {
 "getdstaddress" : ["show firewall address | grep edit","show firewall vip | grep edit", "show firewall addrgrp | grep edit", "show firewall vipgrp | grep edit"]
 }
 
-# Para cada comando do dicionario, gera uma database única em txt.
+# Para cada comando do dicionario, gera uma database
 for dictkey, value in fw_commands_dict.items():
     if "getwafprof" in dictkey:
         output = firewall_session.send_command(value, expect_string='#')
@@ -107,13 +106,12 @@ for dictkey, value in fw_commands_dict.items():
         output = firewall_session.send_command(value, expect_string='#')
         outputlimpo = formata_saida(output)
 
-    with open(JHOSTNAME+"_"+JVDOM+"_"+dictkey+".txt", "w") as file:
+    with open(ABS_PATH+JHOSTNAME+"_"+JVDOM+"_"+dictkey+".txt", "w") as file:
         file.write(outputlimpo)
 
-# Encerramento da sessao SSH.
-firewall_session.disconnect() 
+firewall_session.disconnect() # Encerramento da sessao SSH.
 
-# Coleta via API (internet services).
+### Coleta via API (internet services) ###
 payload = "username="+JUSERNAME+"&secretkey="+JPASSWORD
 login_url = "https://"+JFIREWALL_IP+"/logincheck"
 
@@ -122,7 +120,7 @@ fw_session_api.post(url=login_url, data=payload ,verify=False)
 
 isdb_get_response = fw_session_api.get("https://"+JFIREWALL_IP+"/api/v2/cmdb/firewall/internet-service/"+"?vdom="+JVDOM)
 
-isdb_dict = json.loads(isdb_get_response.content)
+isdb_dict = json.loads(isdb_get_response.text)
 
 lista_isdb = isdb_dict['results']
 isdbdst = ""
@@ -137,9 +135,21 @@ for dict in lista_isdb:
         isdbdst += "\n"+"'"+dict["name"]+"'"
         isdbsrc += "\n"+"'"+dict["name"]+"'"
 
-with open(JHOSTNAME+"_"+JVDOM+"_isdbdst.txt", "w") as file:
-    file.write(isdbdst[1:]) # remove a primeira quebra de linha.
-with open(JHOSTNAME+"_"+JVDOM+"_isdbsrc.txt", "w") as file:
-    file.write(isdbsrc[1:]) # remove a primeira quebra de linha.
+with open(ABS_PATH+JHOSTNAME+"_"+JVDOM+"_isdbdst.txt", "w") as file:
+    file.write(isdbdst[1:])
+with open(ABS_PATH+JHOSTNAME+"_"+JVDOM+"_isdbsrc.txt", "w") as file:
+    file.write(isdbsrc[1:])
+
+# Coleta zonas SD-WAN via API
+sdwanzones_get_response = fw_session_api.get("https://"+JFIREWALL_IP+"/api/v2/cmdb/system/sdwan/zone"+"?vdom="+JVDOM)
+
+sdwanzones_dict = json.loads(sdwanzones_get_response.text)
+
+lista_sdwanzones = sdwanzones_dict['results']
+
+for dict in lista_sdwanzones:
+    with open(ABS_PATH+JHOSTNAME+"_"+JVDOM+"_getint.txt", "a") as file:
+        file.write("\n"+"'"+dict["name"]+"'")
 
 # Espaço para uma frase de efeito no final, sqn, thats all folks!
+

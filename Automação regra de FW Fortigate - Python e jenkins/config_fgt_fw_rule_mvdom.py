@@ -1,8 +1,8 @@
 #encoding: utf-8
 #!/usr/bin/python3
-# Author : Danilo Nogueira Ulbrecht
-# Script para automatizar a criação de regras de Firewall.
-# Funciona apenas com objetos já existentes na database.
+# Autor: Danilo Nogueira Ulbrecht
+# Autor: Cae Masquetti Caetano
+# Autor: Murilo Costa
 
 from sys import argv
 from datetime import datetime
@@ -19,7 +19,7 @@ JSNAT, JSNAT_POOL, JSNAT_POOL_NAME, JPROTOCOL_OPTIONS, JAV_PROFILE, JWEB_FILTER,
 JAPP_CONTROL, JIPS_PROFILE, JWAF_PROFILE, JSSL_INSP_PROF, JLOG, JUSERNAME, JPASSWORD, JMOVE_BEFORE, \
 JSRC_INTERNETSERVICES, JDST_INTERNETSERVICES, JSECURITY_PROFILES = argv[1:]
 
-# Dicionario com os comandos.
+
 fw_rule_dict = {
 "NAME": "set name "+JNAME,
 "SRC_INTF": "set srcintf "+sub("," , " ", JSRC_INTF),
@@ -31,8 +31,6 @@ fw_rule_dict = {
 "SECURITY_PROFILES": "set utm-status "+JSECURITY_PROFILES,
 "INSPECTION_MODE": "set inspection-mode "+JINSPECTION_MODE,
 "SNAT": "set nat "+JSNAT,
-"SNAT_POOL": "set ippool "+JSNAT_POOL,
-"SNAT_POOL_NAME": "set poolname "+JSNAT_POOL_NAME,
 "PROTOCOL_OPTIONS": "set profile-protocol-options "+JPROTOCOL_OPTIONS,
 "AV_PROFILE":"set av-profile "+JAV_PROFILE,
 "WEB_FILTER":"set webfilter-profile "+JWEB_FILTER,
@@ -44,35 +42,40 @@ fw_rule_dict = {
 "LOG": "set logtraffic "+JLOG
 }
 
-# Se source é internet services, remove source padrão.
+
 if JSRC_INTERNETSERVICES == "SIM":
     fw_rule_dict.pop("SRC_ADDR")
     fw_rule_dict.update({"SRC_INTERNETSERVICES": "set internet-service-src enable"})
     fw_rule_dict.update({"SRC_INTERNETSERVICES_NAME": "set internet-service-src-name "+sub("," , " ", JSRC_ADDR)})
 
-# Se destination é internet services, remove destination padrão.
+
 if JDST_INTERNETSERVICES == "SIM":
     fw_rule_dict.pop("DST_ADDR")
     fw_rule_dict.update({"DST_INTERNETSERVICES": "set internet-service enable"})
     fw_rule_dict.update({"DST_INTERNETSERVICES_NAME": "set internet-service-name "+sub("," , " ", JDST_ADDR)})
 
-# lista de comandos.
+
+fw_rule_dict.update({"SNAT_POOL": "set ippool "+JSNAT_POOL})
+fw_rule_dict.update({"SNAT_POOL_NAME": "set poolname "+JSNAT_POOL_NAME})
+
+
 fw_rule_string_list = []
 
 for key, value in fw_rule_dict.items():
     if value.endswith("Nenhum"):
         continue # Se valor de qualquer key for "Nenhum" ignora (sai da lista de comandos)
     else:
-        fw_rule_string_list.append(value) # Se valor passou pelo filtro acima, insira na lista de comandos.
+        fw_rule_string_list.append(value) # Se valor passou pelos filtros acima, insira na lista de comandos
 
-# Comandos padrão adicionados na lista de comandos.
+# Ajustes adicionais na lista de comandos.
 fw_rule_string_list.append("set schedule always")
 fw_rule_string_list.append("set status enable")
-fw_rule_string_list.append('set comments "Criado via automacao Jenkins-Python em '+horariodata_formatada+'"')
+fw_rule_string_list.append('set comments "Criado em '+horariodata_formatada+'"')
 fw_rule_string_list.append("show")
 fw_rule_string_list.append("next")
 
-# Abre sessão SSH com o firewall, aplica os comandos da lista e desconecta.
+# Abre sessão SSH com o firewall, aplica os comandos e desconecta.
+# A saida output_rule pode ser salva em um arquivo se assim desejar como uma evidencia de auditoria (nao implementado).
 firewall = {'device_type': 'fortinet',
           'ip': JFIREWALL_IP,
           'username': JUSERNAME,
@@ -89,7 +92,7 @@ output_rule = firewall_session.send_config_set(fw_rule_string_list, cmd_verify=F
 
 print(output_rule)
 
-# Movimentação da nova regra.
+# Move da regra
 id = "Nenhum"
 regra = findall("edit [0-9]+\\n", output_rule)
 edit, id = str(regra[0]).split(" ")

@@ -4,14 +4,14 @@ import csv
 
 # Gera de 20 em 20 hosts por XML do csv lido
 
-def finaliza_xml_vinte_hosts(numerodoarquivo, RODAPE, contador=0):
-    xml_zabbix_file = open("xml_zabbix_import_file"+"_"+str(numerodoarquivo)+".xml","a+")
+def finaliza_xml_vinte_hosts(fnumerodoarquivo, FRODAPE, fcontador=0):
+    xml_zabbix_file = open("xml_zabbix_import_file"+"_"+str(fnumerodoarquivo)+".xml","a+")
     xml_zabbix_file.write("\n")
-    xml_zabbix_file.write(RODAPE)
+    xml_zabbix_file.write(FRODAPE)
     xml_zabbix_file.close()
-    print ("Arquivo xml_zabbix_import_file"+"_"+str(numerodoarquivo)+".xml, importe os hosts no Zabbix")
-    numerodoarquivo += 1
-    return numerodoarquivo, contador
+    print ("Arquivo xml_zabbix_import_file"+"_"+str(fnumerodoarquivo)+".xml, importe os hosts no Zabbix")
+    fnumerodoarquivo += 1
+    return fnumerodoarquivo, fcontador
 
 
 
@@ -41,8 +41,8 @@ csvfile = open("switchs_import.csv","r")
 csv_read = csv.DictReader(csvfile, delimiter=';')
 SITE = "" ; STACK = "" ; IP = "" ; IPNAT = "" ; VISIBLENAME = "" ; FQDN = ""
 
-xml_zabbix_file = open("xml_zabbix_import_file"+"_"+str(numerodoarquivo)+".xml","a+")
-xml_zabbix_file.write (CABECALHO)
+# xml_zabbix_file = open("xml_zabbix_import_file"+"_"+str(numerodoarquivo)+".xml","a+")
+# xml_zabbix_file.write (CABECALHO)
 
 for linha in csv_read:
     contador += 1
@@ -60,6 +60,7 @@ for linha in csv_read:
         xml_zabbix_file.write(conteudo)
         print (f"Entrada criada para o host {VISIBLENAME}")
         if contador == 20:
+            xml_zabbix_file.close()
             numerodoarquivo, contador = finaliza_xml_vinte_hosts(numerodoarquivo, RODAPE)
     elif STACK == "NAO":
         templatestack = MY_TEMPLATES.get_template("NO-STACK.j2.xml") # Carrega template sem stack
@@ -69,6 +70,7 @@ for linha in csv_read:
         xml_zabbix_file.write(conteudo)
         print (f"Entrada criada para o host {VISIBLENAME}")
         if contador == 20:
+            xml_zabbix_file.close()
             numerodoarquivo, contador = finaliza_xml_vinte_hosts(numerodoarquivo, RODAPE)
 
 xml_zabbix_file.write("\n")
