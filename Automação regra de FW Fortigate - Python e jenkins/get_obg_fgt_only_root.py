@@ -151,5 +151,8 @@ for dict in lista_sdwanzones:
     with open(ABS_PATH+JHOSTNAME+"_"+JVDOM+"_getint.txt", "a") as file:
         file.write("\n"+"'"+dict["name"]+"'")
 
+logout_url = "https://"+JFIREWALL_IP+"/logout"
+fw_session_api.get(url=logout_url, verify=False)
+
 # Espaço para uma frase de efeito no final, sqn, thats all folks!
 
