@@ -1,6 +1,4 @@
 # Autor: Danilo Nogueira Ulbrecht
-# Autor: Cae Masquetti Caetano
-# Autor: Murilo Costa
 # encoding: utf-8
 # Programa para gerar propertyfile de objetos Fortigate para o Jenkins.
 # A coleta e feita via SSH para a maioria dos objetos.

@@ -1,8 +1,6 @@
 #encoding: utf-8
 #!/usr/bin/python3
 # Autor: Danilo Nogueira Ulbrecht
-# Autor: Cae Masquetti Caetano
-# Autor: Murilo Costa
 
 from sys import argv
 from datetime import datetime
@@ -79,7 +77,8 @@ fw_rule_string_list.append("next")
 firewall = {'device_type': 'fortinet',
           'ip': JFIREWALL_IP,
           'username': JUSERNAME,
-          'password': JPASSWORD
+          'password': JPASSWORD,
+          'encoding': 'utf-8'
           }
 
 firewall_session = Netmiko(**firewall)
