@@ -15,7 +15,7 @@ horariodata_formatada = horariodata_atual.strftime("%d/%m/%Y %H:%M")
 JFIREWALL_IP, JVDOM, JNAME, JSRC_INTF, JDST_INTF, JSRC_ADDR, JDST_ADDR, JSERVICE, JACTION, JINSPECTION_MODE, \
 JSNAT, JSNAT_POOL, JSNAT_POOL_NAME, JPROTOCOL_OPTIONS, JAV_PROFILE, JWEB_FILTER, JDNS_FILTER, \
 JAPP_CONTROL, JIPS_PROFILE, JWAF_PROFILE, JSSL_INSP_PROF, JLOG, JUSERNAME, JPASSWORD, JMOVE_BEFORE, \
-JSRC_INTERNETSERVICES, JDST_INTERNETSERVICES, JSECURITY_PROFILES = argv[1:]
+JSRC_INTERNETSERVICES, JDST_INTERNETSERVICES, JSECURITY_PROFILES, JCOMMENT = argv[1:]
 
 
 fw_rule_dict = {
@@ -65,10 +65,13 @@ for key, value in fw_rule_dict.items():
     else:
         fw_rule_string_list.append(value) # Se valor passou pelos filtros acima, insira na lista de comandos
 
+if JCOMMENT == "Nenhum":
+    JCOMMENT = ""
+
 # Ajustes adicionais na lista de comandos.
 fw_rule_string_list.append("set schedule always")
 fw_rule_string_list.append("set status enable")
-fw_rule_string_list.append('set comments "Criado em '+horariodata_formatada+'"')
+fw_rule_string_list.append('set comments "'+JCOMMENT+' - Criado em '+horariodata_formatada+'"')
 fw_rule_string_list.append("show")
 fw_rule_string_list.append("next")
 

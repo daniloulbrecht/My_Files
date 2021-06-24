@@ -3,7 +3,7 @@
 # Programa para gerar propertyfile de objetos Fortigate para o Jenkins.
 # A coleta e feita via SSH para a maioria dos objetos.
 # A documentação oficial da API do Fortigate é paga, e nao temos acesso a DOC mais recente, por isso as coletas sao via SSH.
-# A unica coleta feita via API é de internet services por que traz mais metadados.
+# As unicas coletas feitas via API são de internet services por que traz mais metadados e interface sd-wan.
 
 from re import findall
 from re import sub
@@ -12,11 +12,12 @@ from sys import argv
 import requests
 import json
 import warnings
+import urllib.parse # Para codificação URL.
 
 warnings.filterwarnings('ignore', message='Unverified HTTPS request')
 
 # Recebe valores de fora (shell)
-JHOSTNAME, JFIREWALL_IP, JVDOM, JUSERNAME, JPASSWORD = argv[1:]
+JHOSTNAME, JFIREWALL_IP, JVDOM, JUSERNAME, JPASSWORD, JMGMT_HTTPS_PORT = argv[1:]
 ABS_PATH = "/var/jenkins_home/workspace/FGT_Get_Objects/"
 
 def formata_saida(foutput, firststr="", interfaces=False, fwrule=False):
@@ -30,7 +31,7 @@ def formata_saida(foutput, firststr="", interfaces=False, fwrule=False):
         for item in limpa: limpamais.append(sub('"', "'", item.strip("edit ")))
         limpa = limpamais
     elif fwrule == True:
-        limpa = findall("[0-9]+", foutput) # id das regras em ordem
+        limpa = findall("(?<=edit\\s)\\d+", foutput) # id das regras em ordem
     else:
         limpa = findall("\'.*?\'", sub('\"', "\'", foutput)) # restante
     conteudo = firststr
@@ -110,13 +111,15 @@ for dictkey, value in fw_commands_dict.items():
 firewall_session.disconnect() # Encerramento da sessao SSH.
 
 ### Coleta via API (internet services) ###
+JUSERNAME = urllib.parse.quote(JUSERNAME, safe='')
+JPASSWORD = urllib.parse.quote(JPASSWORD, safe='')
 payload = "username="+JUSERNAME+"&secretkey="+JPASSWORD
-login_url = "https://"+JFIREWALL_IP+"/logincheck"
+login_url = "https://"+JFIREWALL_IP+":"+JMGMT_HTTPS_PORT+"/logincheck"
 
 fw_session_api = requests.session()
 fw_session_api.post(url=login_url, data=payload ,verify=False)
 
-isdb_get_response = fw_session_api.get("https://"+JFIREWALL_IP+"/api/v2/cmdb/firewall/internet-service/"+"?vdom="+JVDOM)
+isdb_get_response = fw_session_api.get("https://"+JFIREWALL_IP+":"+JMGMT_HTTPS_PORT+"/api/v2/cmdb/firewall/internet-service/?vdom="+JVDOM)
 
 isdb_dict = json.loads(isdb_get_response.text)
 
@@ -139,7 +142,7 @@ with open(ABS_PATH+JHOSTNAME+"_"+JVDOM+"_isdbsrc.txt", "w") as file:
     file.write(isdbsrc[1:])
 
 # Coleta zonas SD-WAN via API
-sdwanzones_get_response = fw_session_api.get("https://"+JFIREWALL_IP+"/api/v2/cmdb/system/sdwan/zone"+"?vdom="+JVDOM)
+sdwanzones_get_response = fw_session_api.get("https://"+JFIREWALL_IP+":"+JMGMT_HTTPS_PORT+"/api/v2/cmdb/system/sdwan/zone?vdom="+JVDOM)
 
 sdwanzones_dict = json.loads(sdwanzones_get_response.text)
 
@@ -149,8 +152,7 @@ for dict in lista_sdwanzones:
     with open(ABS_PATH+JHOSTNAME+"_"+JVDOM+"_getint.txt", "a") as file:
         file.write("\n"+"'"+dict["name"]+"'")
 
-logout_url = "https://"+JFIREWALL_IP+"/logout"
+logout_url = "https://"+JFIREWALL_IP+":"+JMGMT_HTTPS_PORT+"/logout"
 fw_session_api.get(url=logout_url, verify=False)
 
 # Espaço para uma frase de efeito no final, sqn, thats all folks!
-

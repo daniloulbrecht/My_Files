@@ -1,0 +1,129 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.plugins.jira.JiraProjectProperty plugin="jira@3.1.3"/>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>HOSTNAME</name>
+          <defaultValue>NOME DO SEU FIREWALL AQUI</defaultValue>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>FIREWALL_IP</name>
+          <defaultValue>O IP DE GERENCIA DO SEU FIREWALL AQUI</defaultValue>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>MULTI_VDOM_HABILITADO</name>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>NAO</string>
+              <string>SIM</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>VDOM</name>
+          <defaultValue>root</defaultValue>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.5.6">
+          <name>SCRIPT_DE_COLETA</name>
+          <randomName>choice-parameter-5784964068641732</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.76">
+              <script>if (MULTI_VDOM_HABILITADO.equals (&quot;SIM&quot;)) {
+  return [&quot;get_obg_fgt_mvdom.py&quot;]
+}
+else if (MULTI_VDOM_HABILITADO.equals (&quot;NAO&quot;)) {
+  return [&quot;get_obg_fgt_only_root.py&quot;]
+}
+</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.76">
+              <script>return [&apos;Escolha SIM ou NAO em MULTI_VDOM_HABILITADO&apos;]</script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>FGT_Get_Objects</projectName>
+          <projectFullName>FGT_Get_Objects</projectFullName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>MULTI_VDOM_HABILITADO</referencedParameters>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <hudson.model.StringParameterDefinition>
+          <name>MGMT_HTTPS_PORT</name>
+          <description>Porta https de gerencia do firewall.</description>
+          <defaultValue>443</defaultValue>
+          <trim>true</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.5.20">
+      <gitLabConnection></gitLabConnection>
+      <jobCredentialId></jobCredentialId>
+      <useAlternativeCredential>false</useAlternativeCredential>
+    </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@1.32">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.6.0">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>https://git.EMPRESA.com.br/hc3/fortigate_rule_automation.git</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>*/master</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="empty-list"/>
+    <extensions/>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <org.jenkinsci.plugins.parameterizedscheduler.ParameterizedTimerTrigger plugin="parameterized-scheduler@1.0">
+      <spec></spec>
+      <parameterizedSpecification>H/20 * * * * % SCRIPT_DE_COLETA=get_obg_fgt_mvdom.py; HOSTNAME=NOMEDOFIREWALL; FIREWALL_IP=172.21.226.1; VDOM=root; MGMT_HTTPS_PORT=443
+H/20 * * * * % SCRIPT_DE_COLETA=get_obg_fgt_mvdom.py; HOSTNAME=NOMEDOFIREWALL; FIREWALL_IP=172.21.226.1; VDOM=VDOM-PARC; MGMT_HTTPS_PORT=443
+H/20 * * * * % SCRIPT_DE_COLETA=get_obg_fgt_mvdom.py; HOSTNAME=GND-TSM-FWDC01; FIREWALL_IP=172.21.98.1; VDOM=root; MGMT_HTTPS_PORT=443
+H/20 * * * * % SCRIPT_DE_COLETA=get_obg_fgt_mvdom.py; HOSTNAME=GND-TSM-FWDC01; FIREWALL_IP=172.21.98.1; VDOM=VDOM-PARC; MGMT_HTTPS_PORT=443
+</parameterizedSpecification>
+    </org.jenkinsci.plugins.parameterizedscheduler.ParameterizedTimerTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>python3 ${SCRIPT_DE_COLETA} ${HOSTNAME} ${FIREWALL_IP} ${VDOM} ${USERNAME} ${PASSWORD} ${MGMT_HTTPS_PORT}</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper plugin="credentials-binding@1.24">
+      <bindings>
+        <org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+          <credentialsId>tvt.svc.jenkins.global</credentialsId>
+          <usernameVariable>USERNAME</usernameVariable>
+          <passwordVariable>PASSWORD</passwordVariable>
+        </org.jenkinsci.plugins.credentialsbinding.impl.UsernamePasswordMultiBinding>
+      </bindings>
+    </org.jenkinsci.plugins.credentialsbinding.impl.SecretBuildWrapper>
+  </buildWrappers>
+</project>
