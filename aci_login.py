@@ -23,7 +23,7 @@ def aci_auth_session(fapicip, fuser, fpassword, fcontentype='json'):
 
 
 #def aci_auth_logout()
-Em construcao
+#Em construcao
 
 if __name__ == "__main__":
     user = 'admin'
