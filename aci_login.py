@@ -28,8 +28,8 @@ def aci_auth_session(fapicip, fuser, fpassword, fcontentype='json'):
         return fsession_api
 
 
-def aci_auth_logout(fapic_session, fip):
-    fresponse = fapic_session.post(url= "https://"+fip+"/api/aaaLogout.json", verify=False)
+def aci_auth_logout(fapicip, fapic_session):
+    fresponse = fapic_session.post(url= "https://"+fapicip+"/api/aaaLogout.json", verify=False)
     if fresponse.status_code != 200:
         print(json.dumps(response.json(), indent = 4))
     else:
@@ -43,4 +43,4 @@ if __name__ == "__main__":
     apic_session = aci_auth_session(ip, user, password)
     bdsdict = apic_session.get(url = 'https://'+ip+'/api/node/mo/uni/tn-DCLessons.json?query-target=children&target-subtree-class=fvBD', verify=False).json()
     print(json.dumps(bdsdict, indent = 4))
-    aci_auth_logout(apic_session, ip)
+    aci_auth_logout(ip, apic_session)
