@@ -9,7 +9,7 @@ class Aci_essential:
     Classe com metodos mais utilizados quando interagimos
     via API com ACI.
     Os metodos possuem reconexao automatica em caso de erros
-    de expiracao de token ou falha de autorizacao 401-403 
+    de expiracao de token ou falha de autorizacao 401-403
     chamando o metodo login.
     Abaixo lista de metodos:
     login
@@ -34,7 +34,7 @@ class Aci_essential:
         loginresponse = session_api.post(url="https://"+self.apicip+"/api/aaaLogin.json",
         data=json.dumps(payload), verify=False)
         if loginresponse.status_code != 200:
-            print(json.dumps(response.json(), indent = 4))
+            print(json.dumps(loginresponse.json(), indent = 4))
             exit(1)
         else:
             print("Login efetuado com sucesso")
@@ -46,20 +46,20 @@ class Aci_essential:
         logoutresponse = self.session.post(url= "https://"+self.apicip+"/api/aaaLogout.json",
         verify=False)
         if logoutresponse.status_code != 200:
-            print(json.dumps(response.json(), indent = 4))
+            print(json.dumps(logoutresponse.json(), indent = 4))
         else:
-            print("Logout efetuado com sucesso")          
+            print("Logout efetuado com sucesso")
     def get_mo(self, get_url):
         """
         Passe o dn da chamada, somente o que vier depois
         de /api/node/mo/... aonde (...) eh o resto da url a ser informada
         como argumento ex: dn.json ou dn.json/?options,filters.
-        
+
         Exemplo de dns:
-        
+
         "uni/.json?query-target=subtree&target-subtree-class=fvCEp&rsp-prop-include=naming-only"
         "uni/tn-Tn-PROD-2-GT/ap-APP-PROD/epg-EPG_NAO_REMOVE_GT.json"
-        
+
         Sera retornado a resposta como json/dicionario.
         """
         result = self.session.get(url = self.mobaseurl+get_url, verify=False)
@@ -92,10 +92,10 @@ class Aci_essential:
         Passe o dn da chamada, somente o que vier depois
         de /api/node/mo/... aonde (...) eh o resto da url a ser informada
         como argumento ex: dn.json.
-        
+
         Exemplo de dn:
         "uni/tn-Tn-PROD-2-GT/ap-APP-PROD/epg-EPG_NAO_REMOVE_GT.json"
-        
+
         Passe o payload em forma de dicionario como ultimo parametro.
         """
         result = self.session.post(url = self.mobaseurl+post_url, data=json.dumps(payload),
@@ -108,9 +108,9 @@ class Aci_essential:
         if result.status_code != 200:
             print(f"Chamada incorreta, status code {str(result.status_code)}")
         else:
-            return result.json()       
-       
- 
+            return result.json()
+
+
 # unit test
 if __name__ == "__main__":
     apicip = '192.168.66.50'
