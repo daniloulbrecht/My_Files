@@ -35,8 +35,8 @@ all_dn_with_no_endpoints = []
 # Se dentro da excecao, pule o epg. Se nao tem endpoints coloque na lista all_dn_with_no_endpoints.
 for epg in all_epgs["imdata"]:
     matchs_exception_list = False
-    for tn in exception_list:
-        if tn in epg["fvAEPg"]["attributes"]["dn"]:
+    for item in exception_list:
+        if item in epg["fvAEPg"]["attributes"]["dn"]:
             matchs_exception_list = True
     if matchs_exception_list == True:
         continue
