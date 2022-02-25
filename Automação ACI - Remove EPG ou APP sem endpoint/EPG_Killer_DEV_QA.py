@@ -5,12 +5,13 @@ from re import findall
 import warnings
 from datetime import datetime
 from sys import argv
+from Aci_essential import Aci_essential 
 from exception_list_DEV_QA import exception_list_DEV_QA as exception_list
 warnings.filterwarnings('ignore', message='Unverified HTTPS request')
 
 """
 Script remove o que nao teve endpoint por duas vezes consecutivas
-checando o arquivo ultima_consulta.txt
+checando o arquivo ultima_consulta_devqa.txt
 Recomenda-se agendar a execucao para X dias de forma periodica
 Kubernetes removemos o application profile referente ao namespace
 Demais removemos o EPG diretamente
@@ -20,52 +21,14 @@ EPGs ou application profiles que nao desejamos remover mesmo sem enpoints
 colocar na lista exception_list_DEV_QA.py
 """
 
-def aci_auth_session(fapicip, fuser, fpassword, fcontentype='json'):
-    """
-    Funcao para criar um sessao API no ACI que ja contem o token
-    bem como o content-type das operacoes posteriores (post, put),
-    dessa forma nao e necessario repetir esses parametros nas chamadas
-    apenas chamar url e payload (body).
-    """
-    fsession_api = requests.session()
-    fpayload = {"aaaUser" :{"attributes": {"name": fuser, "pwd": fpassword}}}
-    floginresponse = fsession_api.post(url="https://"+fapicip+"/api/aaaLogin.json",
-    data=json.dumps(fpayload), verify=False)
-    if floginresponse.status_code != 200:
-        print(json.dumps(response.json(), indent = 4))
-        exit(1)
-    else:
-        print("Login efetuado com sucesso")
-        floginresponse = floginresponse.json()
-        ftoken = floginresponse['imdata'][0]['aaaLogin']['attributes']['token']
-        if fcontentype == 'xml':
-            fsession_api.headers.update({'APIC-cookie': ftoken,
-            'Content-Type': 'application/xml'})
-        else:
-            fsession_api.headers.update({'APIC-cookie': ftoken,
-            'Content-Type': 'application/json'})
-        return fsession_api
-
-
-def aci_auth_logout(fapicip, fapic_session):
-    fresponse = fapic_session.post(url= "https://"+fapicip+"/api/aaaLogout.json",
-    verify=False)
-    if fresponse.status_code != 200:
-        print(json.dumps(response.json(), indent = 4))
-    else:
-        print("Logout efetuado com sucesso")
-
-
-apicip, username, password = argv[1:]
+apicip, username, password = argv[1:]		
 horariodata_atual = datetime.now()
 horariodata_formatada = horariodata_atual.strftime("%d-%m-%Y")
-apic_session = aci_auth_session(apicip, username, password)
-baseurl = "https://"+apicip+"/api/node/mo/"
+apic_session  = Aci_essential(apicip, username, password)
 get_all_endpoints = "uni/.json?query-target=subtree&target-subtree-class=fvCEp&rsp-prop-include=naming-only"
 get_all_epgs = "uni/.json?query-target=subtree&target-subtree-class=fvAEPg&rsp-prop-include=naming-only"
-all_endpoints = apic_session.get(url = baseurl+get_all_endpoints, verify=False).json()
-all_epgs = apic_session.get(url = baseurl+get_all_epgs, verify=False).json()
-all_epgs_prod_2 = []
+all_endpoints = apic_session.get_mo(get_all_endpoints)
+all_epgs = apic_session.get_mo(get_all_epgs)
 all_dn_with_no_endpoints = []
 
 
@@ -100,52 +63,44 @@ epgs_removidos = []
 ultima_consulta_str = ""
 
 # Abertura da ultima coleta para confronto.
-with open ('ultima_consulta.txt', 'r') as ultima_consulta:
+with open ('ultima_consulta_devqa.txt', 'r') as ultima_consulta:
     for line in ultima_consulta:
         ultima_consulta_str += line
 
-# Faz backup dos tenants
+# Backup do fabric
 if len(ultima_consulta_str) > 0:
     faz_backup_ACI = {"configExportP":{"attributes":{"dn":"uni/fabric/configexp-defaultOneTime","name":"defaultOneTime",
 	"snapshot":"true","targetDn":"","adminSt":"triggered","rn":"configexp-defaultOneTime","status":"created,modified",
 	"descr":horariodata_formatada+'_remocao_de_epgs'},"children":[]}}
-    apic_session.post(url = baseurl+"uni/fabric/configexp-defaultOneTime.json",
-    data=json.dumps(faz_backup_ACI), verify=False).json
+    apic_session.post_mo("uni/fabric/configexp-defaultOneTime.json", faz_backup_ACI)
 
 # Se epg ou app esta dentro da coleta anterior, deleta o epg ou app e faz um backup com data.
 for dn in all_dn_with_no_eps_all_tenants:
     if dn in ultima_consulta_str:
-        payload = {"fvAEPg":{"attributes":{"dn":dn,"status":"deleted"},
-        "children":[]}}
-        backup = apic_session.get(url = baseurl+dn+
-        ".json?query-target=self&rsp-subtree=full&rsp-prop-include=config-only",
-        verify=False).json()
+        payload = {"fvAEPg":{"attributes":{"dn":dn,"status":"deleted"},"children":[]}}
+        backup = apic_session.get_mo(dn+".json?query-target=self&rsp-subtree=full&rsp-prop-include=config-only")
 #        print(f"Efetuando backup do {dn}")
         epg_name = findall('(?<=tn-).*', dn)
         epg_name = sub('\/', '_', epg_name[0])
-        file_name = horariodata_formatada+"_"+epg_name+".json"
+        file_name = horariodata_formatada+"_"+epg_name+".json"		
         with open (file_name, 'w') as backup_epg:
             backup_epg.write(json.dumps(backup, indent = 4))
 #        print(f"Deletando {dn}")
-        apic_session.post(url = baseurl+dn+".json", data=json.dumps(payload), verify=False)
-        epgs_removidos.append(dn)
+        apic_session.post_mo(dn+".json", payload)
+        epgs_removidos.append(dn)			
 
 for dn in all_dn_with_no_eps_k8s:
     if dn in ultima_consulta_str:
-        payload = {"fvAp":{"attributes":{"dn":dn,"status":"deleted"},
-        "children":[]}}
-        backup = apic_session.get(url = baseurl+dn+
-        ".json?query-target=self&rsp-subtree=full&rsp-prop-include=config-only",
-        verify=False).json()
+        payload = {"fvAp":{"attributes":{"dn":dn,"status":"deleted"},"children":[]}}
+        backup = apic_session.get_mo(dn+".json?query-target=self&rsp-subtree=full&rsp-prop-include=config-only")
 #        print(f"Efetuando backup do {dn}")
         app_name = findall('(?<=tn-).*', dn)
-        app_name = sub('\/', '_', app_name[0])
+        app_name = sub('\/', '_', app_name[0]) 
         file_name = horariodata_formatada+"_"+app_name+".json"
         with open (file_name, 'w') as backup_app:
             backup_app.write(json.dumps(backup, indent = 4))
 #        print(f"Deletando {dn}")
-        apic_session.post(url = baseurl+dn+".json", data=json.dumps(payload),
-        verify=False)
+        apic_session.post_mo(dn+".json", payload)
         epgs_removidos.append(dn)
 
 # Depois de removidos os epgs ou apps removemos da lista mais atual essas entradas,
@@ -168,7 +123,7 @@ print ("#### ATENCAO: OS EPGS ABAIXO SERAO REMOVIDOS DAQUI A 30 DIAS CASO NAO HA
 print(f"Total de EPGs que serao removidos {len(all_dn_with_no_eps_k8s)+len(all_dn_with_no_eps_all_tenants)}")
 
 # Escrevemos no arquivo a lista atualizada para ser confrontada na proxima consulta.
-with open ('ultima_consulta.txt', 'w') as ultima_consulta:
+with open ('ultima_consulta_devqa.txt', 'w') as ultima_consulta:
     for dn in all_dn_with_no_eps_k8s:
         ultima_consulta.write(dn+"\n")
         print(f'{dn}')
@@ -176,4 +131,4 @@ with open ('ultima_consulta.txt', 'w') as ultima_consulta:
         ultima_consulta.write(dn+"\n")
         print(f'{dn}')
 
-aci_auth_logout(apicip, apic_session)
+apic_session.logout()
