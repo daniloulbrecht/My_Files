@@ -160,10 +160,10 @@ if __name__ == "__main__":
             }
         ]
     }
+    epg_delete_dict = {"fvAEPg":{"attributes":{"dn":"uni/tn-Prod/ap-APP_Prod/epg-teste","status":"deleted"},"children":[]}}
     my_aci_session = Aci_essential(apicip, username, password)
     all_endpoints = my_aci_session.get_mo("uni/.json?query-target=subtree&target-subtree-class=fvCEp&rsp-prop-include=naming-only")
     all_nodes = my_aci_session.get_class("fabricNode.json")
     my_aci_session.post_mo("uni/tn-Prod/ap-APP_Prod/epg-teste.json", epg_dict_json)
-    epg_delete_dict = {"fvAEPg":{"attributes":{"dn":"uni/tn-Prod/ap-APP_Prod/epg-teste","status":"deleted"},"children":[]}}
     my_aci_session.post_mo("uni/tn-Prod/ap-APP_Prod/epg-teste.json", epg_delete_dict)
     my_aci_session.logout()
