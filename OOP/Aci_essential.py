@@ -1,5 +1,6 @@
 import requests
 import json
+import time
 import warnings
 warnings.filterwarnings('ignore', message='Unverified HTTPS request')
 
@@ -17,6 +18,7 @@ class Aci_essential:
     get_mo
     get_class
     post_mo (criar, deletar, incrementar ou atualizar managed objects)
+    make_fabkp - Faz backup onetime full do fabric e espera completar
     """
     def __init__(self, apicip, username, password):
         self.apicip = apicip
@@ -37,7 +39,7 @@ class Aci_essential:
             print(json.dumps(loginresponse.json(), indent = 4))
             exit(1)
         else:
-            print("Login efetuado com sucesso")
+#            print("Login efetuado com sucesso")
             self.session = session_api
     def logout(self):
         """
@@ -47,8 +49,8 @@ class Aci_essential:
         verify=False)
         if logoutresponse.status_code != 200:
             print(json.dumps(logoutresponse.json(), indent = 4))
-        else:
-            print("Logout efetuado com sucesso")
+#        else:
+#            print("Logout efetuado com sucesso")
     def get_mo(self, get_url):
         """
         Passe o dn da chamada, somente o que vier depois
@@ -109,7 +111,38 @@ class Aci_essential:
             print(f"Chamada incorreta, status code {str(result.status_code)}")
         else:
             return result.json()
-
+    def make_fabkp(self, description):
+        """
+		Esse metodo faz backup onetime do fabric inteiro.
+		Informe a descricao do backup como argumento. O metodo nao encerra ate
+		que o backup com a descricao passada seja listado no ACI,
+		por isso passe descricoes unicas e nao as repita, sugestao: Sempre
+		coloque o horario com segundos na descricao passada ao metodo.
+		isso e util em casos de scripting aonde queremos que o backup seja
+		completado primeiro para entao seguirmos com as proximas acoes de forma
+		segura.
+        """
+        post_url = "uni/fabric/configexp-defaultOneTime.json"
+        payload = {"configExportP":{"attributes":{"dn":"uni/fabric/configexp-defaultOneTime","name":"defaultOneTime",
+        "snapshot":"true","targetDn":"","adminSt":"triggered","rn":"configexp-defaultOneTime","status":"created,modified",
+        "descr": description},"children":[]}}
+        result = self.session.post(url = self.mobaseurl+post_url, data=json.dumps(payload),
+        verify=False)
+        if result.status_code == 403 or result.status_code == 401:
+            self.login()
+            print ("reconectado")
+            result = self.session.post(url = self.mobaseurl+post_url, data=json.dumps(payload),
+            verify=False)
+        check_bkp_call = 'configSnapshot.json?query-target-filter=eq(configSnapshot.descr, "{}")'.format(description)
+        check_backup_finished = self.session.get(url = self.classbaseurl+check_bkp_call, verify=False).json()
+        counter = 0
+        while description not in str(check_backup_finished):
+            print("fabric backup in progress, please wait ...")
+            time.sleep(10)
+            counter =+ 1
+            check_backup_finished = self.session.get(url = self.classbaseurl+check_bkp_call, verify=False).json()
+            if counter > 12:
+                raise RuntimeError("O backup demorou mais de 120s para completar ... abortado")
 
 # unit test
 if __name__ == "__main__":
